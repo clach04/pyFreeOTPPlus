@@ -8,11 +8,14 @@ Only tested with:
   * Python 3.7.3
   * Python 2.7.10
 
-Relies on https://bitbucket.org/clach04/gtotp/ - this is and old (unpackaged) module with support for very old versions of Python.
 
-TODO consider using something pip installable, like:
+## Requirements/installation
 
-  * https://github.com/pyauth/pyotp
+Python 2.6 or 3.x
+
+Relies on https://github.com/pyauth/pyotp but will use https://bitbucket.org/clach04/gtotp/ if pyotp is missing.
+
+    pip install pyotp
 
 ## Usage
 
