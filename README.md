@@ -10,10 +10,9 @@ Only tested with:
 
 Relies on https://bitbucket.org/clach04/gtotp/ - this is and old (unpackaged) module with support for very old versions of Python.
 
-TODO consider using something pip installable:
+TODO consider using something pip installable, like:
 
   * https://github.com/pyauth/pyotp
-  * https://github.com/tknarr/PyAuth
 
 ## Usage
 
