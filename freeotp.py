@@ -72,8 +72,9 @@ def doit(filename):
         google_qrcode_url = 'https://chart.apis.google.com/chart?'
 
         # order is important, do not use a dict!
-        # no idea why but QR code will not import into FreeOTP nor FreeOTP+
-        # unless the exact order below is used
+        # QR code will not import into FreeOTP nor FreeOTP+
+        # unless the exact order below is used as some of this generates a otpauth URI
+        # see https://github.com/Authenticator-Extension/Authenticator/wiki/Standard-OTP-Backup-Format-Devloper-Info
         google_qrcode_url_params = [
                 ('cht', 'qr'),
                 ('chs', '300x300'),
@@ -81,7 +82,7 @@ def doit(filename):
                 ('secret', secret_base32)
             ]
         google_qrcode_url = google_qrcode_url + urlencode(google_qrcode_url_params)
-        google_qrcode_url = google_qrcode_url.replace('&secret=', '%3Fsecret=')  # no idea why this is needed but qrcode doesn't import otherwise
+        google_qrcode_url = google_qrcode_url.replace('&secret=', '%3Fsecret=')  # this is needed is the otpauth URI needs to be escape in the chart URL
         print(google_qrcode_url)
 
 def main(argv=None):
