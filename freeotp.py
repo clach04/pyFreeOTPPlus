@@ -6,7 +6,7 @@
 from https://github.com/helloworld1/FreeOTPPlus
 """
 
-
+import base64
 import json  # Python 2.6+
 import sys
 import time
@@ -16,10 +16,14 @@ try:
 except ImportError:
     pass  # assume py2
 
-import gauth  # from https://bitbucket.org/clach04/gtotp
+try:
+    import pyotp  # from https://github.com/pyauth/pyotp
+except ImportError:
+    import gauth  # from https://bitbucket.org/clach04/gtotp
+    pyotp = None
 
 
-b32encode = gauth.base64.b32encode
+b32encode = base64.b32encode
 
 try:
     urlencode = urllib.urlencode  # py2
@@ -51,14 +55,20 @@ def doit(filename):
         bin_secret = bytearray(unsigned_int_array)
         secret_base32 = b32encode(bin_secret)
         secret_base32 = secret_base32.replace(b'=', b'')  # remove padding
-        #g = gauth.GoogleAuthenticator(secret=secret_base32, num_digits=x['digits'])
-        g = gauth.GoogleAuthenticator(bin_secret=bin_secret, num_digits=x['digits'])
-        print('%s %s' % (x['label'], g))
+        secret_base32 = secret_base32.decode('latin1')  # pyotp requires strings
+        if pyotp:
+            g = pyotp.TOTP(secret_base32, digits=x['digits'], interval=x['period'])
+            print('%s %s' % (x['label'], g.now()))
+        else:
+            #g = gauth.GoogleAuthenticator(secret=secret_base32, num_digits=x['digits'])
+            g = gauth.GoogleAuthenticator(bin_secret=bin_secret, num_digits=x['digits'])
+            print('%s %s' % (x['label'], g))  # TODO this assumes 30 second period window
 
         # Generate (at least one) URL for a qrcode
+        # TODO if pyotp use its builtin support?
 
         # NOTE google chart has potential to leak URL into browser history
-        # TODO standalone js version, see https://github.com/evgeni/qifi for demo
+        # TODO standalone js version, see https://github.com/evgeni/qifi for demo (and https://github.com/neocotic/qrious)
         google_qrcode_url = 'https://chart.apis.google.com/chart?'
 
         # order is important, do not use a dict!
