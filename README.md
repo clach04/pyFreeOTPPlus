@@ -10,3 +10,11 @@ Only tested with:
   * Python 2.7.10
 
 Relies on https://bitbucket.org/clach04/gtotp/
+
+## Usage
+
+    python freeotp.py freeotp-backup.json
+
+Dumps pins for all.
+Also dumps a URL for qrcode scanning - NOTE browser history will expose seed - do not use!
+(its there for testing purposes of test values).
