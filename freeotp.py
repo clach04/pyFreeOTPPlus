@@ -53,9 +53,11 @@ def doit(filename):
         signed_int_array = x['secret']  # storage of secret is `signed char`, Python built-in byte array need this to be unsigned
         unsigned_int_array = [i & 0xff for i in signed_int_array]  # TODO add support for Python pre-generator support
         bin_secret = bytearray(unsigned_int_array)
+        print('Binary secret length=%d' % len(bin_secret))
         secret_base32 = b32encode(bin_secret)
         secret_base32 = secret_base32.replace(b'=', b'')  # remove padding
         secret_base32 = secret_base32.decode('latin1')  # pyotp requires strings
+        print('base32 secret length=%d' % len(secret_base32))
         if pyotp:
             g = pyotp.TOTP(secret_base32, digits=x['digits'], interval=x['period'])
             print('%s %s' % (x['label'], g.now()))
