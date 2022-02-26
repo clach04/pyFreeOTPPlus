@@ -1,6 +1,6 @@
 # pyFreeOTPPlus
 
-Python script to dump TOTP 2fa pin from Android FreeOTPPlus (FreeOTP+) export file freeotp-backup.json
+Python script to dump TOTP RFC 62382fa pin from Android FreeOTPPlus (FreeOTP+) export file freeotp-backup.json
 
 Should work with almost any version of Python from 2.6 onwards.
 Only tested with:
