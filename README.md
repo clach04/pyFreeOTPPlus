@@ -38,3 +38,29 @@ Also dumps a URL for qrcode scanning - NOTE browser history will expose seed - d
   * https://authenticator.cc/docs/en/otp-backup
   * https://github.com/slandx/tfat
   * https://github.com/pepa65/twofat
+
+
+## freeotp-backup.json schema
+
+Sample schema with notes (i.e. not real).
+
+    {
+        "tokens": [
+            {
+                "digits": 6,
+                "counter": 0,
+                "issuerExt": "ISSUER_NAME",
+                "period": 30,
+                "label": "YOUR_NAME",
+                "secret": [SIGNED 1-BYTE INTEGER VALUES PER BYTE],
+                "algo": "SHA1",
+                "type": "TOTP"
+            },
+            ...
+        ],
+
+        "tokenOrder": [
+            "ISSUER_NAME:YOUR_NAME",
+            ...
+        ]
+    }
