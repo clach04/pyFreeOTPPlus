@@ -13,7 +13,7 @@ Only tested with:
 
 Python 2.6 or 3.x
 
-Relies on https://github.com/pyauth/pyotp but will use https://hg.sr.ht/~clach04/gtotp/ if pyotp is missing.
+Relies on https://github.com/pyauth/pyotp but will use https://hg.sr.ht/~clach04/gtotp if pyotp is missing.
 
     pip install pyotp
 
