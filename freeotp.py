@@ -58,9 +58,11 @@ def doit(filename):
     for x in otp['tokens']:
         print('')
         print(x)
+        print('issuer', x['issuerExt'])
+        print('label', x['label'])
         assert x['algo'] == u'SHA1'
         assert x['type'] == 'TOTP'
-        
+
         signed_int_array = x['secret']  # storage of secret is `signed char`, Python built-in byte array need this to be unsigned
         unsigned_int_array = [i & 0xff for i in signed_int_array]  # TODO add support for Python pre-generator support
         bin_secret = bytearray(unsigned_int_array)
