@@ -42,7 +42,7 @@ except AttributeError:
     urlencode = urllib.parse.urlencode  # py3
 
 
-def doit(filename):
+def doit(filename, verbose=True, display_registration_details=True):
     print(filename)
     f = open(filename, 'rb')
     json_data_str = f.read()
@@ -57,7 +57,8 @@ def doit(filename):
 
     for x in otp['tokens']:
         print('')
-        print(x)
+        if verbose:
+            print(x)
         print('issuer', x['issuerExt'])
         print('label', x['label'])
         assert x['algo'] == u'SHA1'
@@ -74,12 +75,14 @@ def doit(filename):
                 bin_secret = base64.b32decode(x['secret_base32'])
             except KeyError:
                 raise ValueError('Missing secret in (json) config, both standard "secret" and extension "secret_base32"')
-        print('Binary secret length=%d' % len(bin_secret))
+        if verbose:
+            print('Binary secret length=%d' % len(bin_secret))
         secret_base32 = b32encode(bin_secret)
         secret_base32 = secret_base32.replace(b'=', b'')  # remove padding
         secret_base32 = secret_base32.decode('latin1')  # pyotp requires strings
-        print('base32 secret length=%d' % len(secret_base32))
-        print('base32 secret %s' % secret_base32)
+        if verbose:
+            print('base32 secret length=%d' % len(secret_base32))
+            print('base32 secret %s' % secret_base32)
         if pyotp:
             g = pyotp.TOTP(secret_base32, digits=x['digits'], interval=x['period'])
             print('Current 2FA/OTP PIN for %s %s' % (x['label'], g.now()))
@@ -88,35 +91,36 @@ def doit(filename):
             g = gauth.GoogleAuthenticator(bin_secret=bin_secret, num_digits=x['digits'])
             print('Current 2FA/OTP PIN for %s %s' % (x['label'], g))  # TODO this assumes 30 second period window
 
-        # Generate (at least one) URL for a qrcode
-        # TODO if pyotp use its builtin support?
+        if display_registration_details:
+            # Generate (at least one) URL for a qrcode
+            # TODO if pyotp use its builtin support?
 
-        # NOTE google chart has potential to leak URL into browser history as well as possible Google history
-        # TODO 1 - standalone js version, see https://github.com/evgeni/qifi for demo (and https://github.com/neocotic/qrious)
-        # TODO 2 - console block qr code
-        google_qrcode_url = 'https://chart.apis.google.com/chart?'
+            # NOTE google chart has potential to leak URL into browser history as well as possible Google history
+            # TODO 1 - standalone js version, see https://github.com/evgeni/qifi for demo (and https://github.com/neocotic/qrious)
+            # TODO 2 - console block qr code
+            google_qrcode_url = 'https://chart.apis.google.com/chart?'
 
-        ######## hack!
-        #secret_base32 = 'MZXW633PN5XW6==='
-        #secret_base32 = 'MZXW633PN5XW6'
-        #x['issuerExt'] = 'Demo value from GitHub google/google-authenticator/issues/70'  # slashes in name appear to be allowed
-        #x['issuerExt'] = 'Demo value from GitHub issues 70'  # Shorter name
-        ######## hack!
+            ######## hack!
+            #secret_base32 = 'MZXW633PN5XW6==='
+            #secret_base32 = 'MZXW633PN5XW6'
+            #x['issuerExt'] = 'Demo value from GitHub google/google-authenticator/issues/70'  # slashes in name appear to be allowed
+            #x['issuerExt'] = 'Demo value from GitHub issues 70'  # Shorter name
+            ######## hack!
 
-        # order is important, do not use a dict!
-        # QR code will not import into FreeOTP nor FreeOTP+
-        # unless the exact order below is used as some of this generates a otpauth URI
-        # see https://github.com/Authenticator-Extension/Authenticator/wiki/Standard-OTP-Backup-Format-Devloper-Info
-        google_qrcode_url_params = [
-                ('cht', 'qr'),
-                ('chs', '300x300'),
-                ('chl', 'otpauth://totp/' + x['issuerExt']),
-                ('secret', secret_base32)
-            ]
-        google_qrcode_url = google_qrcode_url + urlencode(google_qrcode_url_params)
-        google_qrcode_url = google_qrcode_url.replace('&secret=', '%3Fsecret=')  # this is needed is the otpauth URI needs to be escape in the chart URL
-        print('WARNING Google URL not secure!')
-        print(google_qrcode_url)
+            # order is important, do not use a dict!
+            # QR code will not import into FreeOTP nor FreeOTP+
+            # unless the exact order below is used as some of this generates a otpauth URI
+            # see https://github.com/Authenticator-Extension/Authenticator/wiki/Standard-OTP-Backup-Format-Devloper-Info
+            google_qrcode_url_params = [
+                    ('cht', 'qr'),
+                    ('chs', '300x300'),
+                    ('chl', 'otpauth://totp/' + x['issuerExt']),
+                    ('secret', secret_base32)
+                ]
+            google_qrcode_url = google_qrcode_url + urlencode(google_qrcode_url_params)
+            google_qrcode_url = google_qrcode_url.replace('&secret=', '%3Fsecret=')  # this is needed is the otpauth URI needs to be escape in the chart URL
+            print('WARNING Google URL not secure!')
+            print(google_qrcode_url)
 
         # generate OTPAUTH_URI otpauth://totp/.. URL -format mentioned in https://github.com/helloworld1/FreeOTPPlus/issues/30
         """
@@ -141,17 +145,19 @@ def doit(filename):
         tmp_str = tmp_str[len('chl='):]  # FIXME chl not needed
         url = 'otpauth://totp/' + tmp_str
         """
-        url = 'otpauth://totp/' + x['issuerExt'] + '?secret=' + secret_base32  # FIXME escape name? base32 Secret should be fine as-is?
-        print(url)
 
-        if segno:
-            # NOTE segno could be used for desktop (maybe) web browser launching with locally generated SVG and/or PNG
-            qr = segno.make(url)
-            qr.terminal()
-        elif pyqrcodeng:
-            qr = pyqrcodeng.create(url)
-            qr.term()  # this "prints" to stdout/tty/console (works for win32)
-            # print(qr.terminal())  # this generates ANSI/VT100 escape sequences (not suitable for win32)
+        if display_registration_details:
+            url = 'otpauth://totp/' + x['issuerExt'] + '?secret=' + secret_base32  # FIXME escape name? base32 Secret should be fine as-is?
+            print(url)
+
+            if segno:
+                # NOTE segno could be used for desktop (maybe) web browser launching with locally generated SVG and/or PNG
+                qr = segno.make(url)
+                qr.terminal()
+            elif pyqrcodeng:
+                qr = pyqrcodeng.create(url)
+                qr.term()  # this "prints" to stdout/tty/console (works for win32)
+                # print(qr.terminal())  # this generates ANSI/VT100 escape sequences (not suitable for win32)
 
 
 def main(argv=None):
