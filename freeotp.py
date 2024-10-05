@@ -63,9 +63,17 @@ def doit(filename):
         assert x['algo'] == u'SHA1'
         assert x['type'] == 'TOTP'
 
-        signed_int_array = x['secret']  # storage of secret is `signed char`, Python built-in byte array need this to be unsigned
-        unsigned_int_array = [i & 0xff for i in signed_int_array]  # TODO add support for Python pre-generator support
-        bin_secret = bytearray(unsigned_int_array)
+        try:
+            signed_int_array = x['secret']  # storage of secret is `signed char`, Python built-in byte array need this to be unsigned
+            unsigned_int_array = [i & 0xff for i in signed_int_array]  # TODO add support for Python pre-generator support
+            bin_secret = bytearray(unsigned_int_array)
+        except KeyError:
+            # standard value missing, now check for (non-standard) extension to format,
+            # check for "secret_base32" instead, this allows for manual updates of json file to be easier/possible
+            try:
+                bin_secret = base64.b32decode(x['secret_base32'])
+            except KeyError:
+                raise ValueError('Missing secret in (json) config, both standard "secret" and extension "secret_base32"')
         print('Binary secret length=%d' % len(bin_secret))
         secret_base32 = b32encode(bin_secret)
         secret_base32 = secret_base32.replace(b'=', b'')  # remove padding
@@ -152,7 +160,7 @@ def main(argv=None):
 
     print('Python %s on %s' % (sys.version, sys.platform))
 
-    json_filename = argv[1]
+    json_filename = argv[1] # FIXME default filename to 'freeotp-backup.json' if missing
     doit(json_filename)
     
     return 0

@@ -24,6 +24,10 @@ Optionally install QR code generator for console output:
 
 I.e. `pip install pyotp segno`
 
+Quick and dirty setup, if skipping above:
+
+    curl https://hg.sr.ht/~clach04/gtotp/raw/gauth.py?rev=tip -o gauth.py
+
 ## Usage
 
     python freeotp.py freeotp-backup.json
@@ -53,6 +57,7 @@ Sample schema with notes (i.e. not real).
                 "period": 30,
                 "label": "YOUR_NAME",
                 "secret": [SIGNED 1-BYTE INTEGER VALUES PER BYTE],
+                "secret_base32": "optional non-standard for FreeOTPPlus; base32 encoded string instead of integer secret above",
                 "algo": "SHA1",
                 "type": "TOTP"
             },
