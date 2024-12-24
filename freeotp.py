@@ -8,6 +8,7 @@ from https://github.com/helloworld1/FreeOTPPlus
 
 import base64
 import json  # Python 2.6+
+import os
 import sys
 import time
 import urllib
@@ -17,10 +18,21 @@ except ImportError:
     pass  # assume py2
 
 try:
-    import pyotp  # from https://github.com/pyauth/pyotp
+    import colorama
+    if not ('TERM' in os.environ or 'TERM_PROGRAM' in os.environ):
+        # For non-Windows below is a NOOP so no need for a Microsoft Windows check.. but this will screw up TTYs like Mintty under win32/win64 :-(
+        try:
+            colorama.just_fix_windows_console()
+        except AttributeError:
+            # older version, for example '0.4.4'
+            colorama.init()
 except ImportError:
-    import gauth  # from https://bitbucket.org/clach04/gtotp
-    pyotp = None
+    colorama = None
+
+try:
+    import pyqrcodeng  # https://github.com/pyqrcode/pyqrcodeNG
+except ImportError:
+    pyqrcodeng = None
 
 try:
     #raise ImportError  # debug as seeing issues - appears to be a python 3 specific issue for both segno and pyqrcodeng
@@ -28,10 +40,13 @@ try:
 except ImportError:
     segno = None
 
+
 try:
-    import pyqrcodeng  # https://github.com/pyqrcode/pyqrcodeNG
+    import pyotp  # from https://github.com/pyauth/pyotp
 except ImportError:
-    pyqrcodeng = None
+    import gauth  # from https://bitbucket.org/clach04/gtotp
+    pyotp = None
+
 
 
 b32encode = base64.b32encode
@@ -41,8 +56,34 @@ try:
 except AttributeError:
     urlencode = urllib.parse.urlencode  # py3
 
+is_win = sys.platform.startswith('win')
 
 def doit(filename, verbose=True, display_registration_details=True):
+    guess_color_available = (colorama is not None) or (not is_win) or (is_win and ('TERM' in os.environ or 'TERM_PROGRAM' in os.environ))
+    if os.environ.get('NO_COLOR'):  # NO_COLOR https://no-color.org/
+        # skips processing for doing highlighting
+        use_color = False
+    elif not sys.stdout.isatty() and not (is_win and ('TERM' in os.environ or 'TERM_PROGRAM' in os.environ)):  # NOTE under Microsoft Windows and mintty, isatty is false even when it is a tty :-(
+        print('elif sys.stdout.isatty() %r' % sys.stdout.isatty())
+        use_color = False
+    else:
+        use_color = guess_color_available  # or some_color_option
+    print('tem %r' % ('TERM' in os.environ or 'TERM_PROGRAM' in os.environ))
+    print('sys.stdout.isatty() %r' % sys.stdout.isatty())
+    print('guess_color_available %r' % guess_color_available)
+    print('is_win %r' % is_win)
+    print('use_color %r' % use_color)
+
+    if use_color:
+        color_reset = '\x1b[00m'
+        color_red = '\x1b[31m'
+        color_green = '\x1b[01;32m'
+        highlight_text_start, highlight_text_stop = color_red, color_reset
+    else:
+        highlight_text_start, highlight_text_stop = '', ''
+        color_green = ''
+
+
     print(filename)
     f = open(filename, 'rb')
     json_data_str = f.read()
@@ -85,11 +126,12 @@ def doit(filename, verbose=True, display_registration_details=True):
             print('base32 secret %s' % secret_base32)
         if pyotp:
             g = pyotp.TOTP(secret_base32, digits=x['digits'], interval=x['period'])
-            print('Current 2FA/OTP PIN for %s %s' % (x['label'], g.now()))
+            pin = g.now()
         else:
             #g = gauth.GoogleAuthenticator(secret=secret_base32, num_digits=x['digits'])
             g = gauth.GoogleAuthenticator(bin_secret=bin_secret, num_digits=x['digits'])
-            print('Current 2FA/OTP PIN for %s %s' % (x['label'], g))  # TODO this assumes 30 second period window
+            pin = g
+        print('Current 2FA/OTP PIN for %s%s%s %s%s%s' % (color_green, x['label'], highlight_text_stop, highlight_text_start, pin, highlight_text_stop))  # TODO this assumes 30 second period window
 
         if display_registration_details:
             # Generate (at least one) URL for a qrcode
