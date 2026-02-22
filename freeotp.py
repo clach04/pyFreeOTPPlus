@@ -100,8 +100,8 @@ def doit(filename, verbose=True, display_registration_details=True):
         print('')
         if verbose:
             print(x)
-        print('issuer', x['issuerExt'])
-        print('label', x['label'])
+        print('issuer %s%s%s' % (color_green, x['issuerExt'], highlight_text_stop))
+        print('label %s%s%s' % (color_green, x['label'], highlight_text_stop))
         assert x['algo'] == u'SHA1'
         assert x['type'] == 'TOTP'
 
@@ -210,7 +210,7 @@ def main(argv=None):
 
     json_filename = argv[1] # FIXME default filename to 'freeotp-backup.json' if missing
     doit(json_filename)
-    
+
     return 0
 
 
