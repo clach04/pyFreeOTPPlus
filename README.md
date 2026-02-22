@@ -69,3 +69,41 @@ Sample schema with notes (i.e. not real).
             ...
         ]
     }
+
+## Sample json file for testing
+
+
+  * secret (in base32) "MZXW633PN5XW6===" == 'fooooooo' , See https://github.com/google/google-authenticator/issues/70
+  * secret (in base32) "PSKFB2VHFIEGNI2H"
+
+Also see:
+
+  * https://github.com/clach04/pebble-authenticator/blob/ClayAuthenticator/src/c/authenticator.c
+  * https://github.com/clach04/pebble-authenticator/blob/ClayAuthenticator/src/pkjs/config.js
+
+```json
+{
+    "tokens": [
+        {
+            "digits": 6,
+            "counter": 0,
+            "issuerExt": "Gtest",
+            "period": 30,
+            "label": "email@address.here",
+            "secret_base32": "MZXW633PN5XW6===",
+            "algo": "SHA1",
+            "type": "TOTP"
+        },
+        {
+            "digits": 6,
+            "counter": 0,
+            "issuerExt": "Fake",
+            "period": 30,
+            "label": "email@address.here",
+            "secret_base32": "PSKFB2VHFIEGNI2H",
+            "algo": "SHA1",
+            "type": "TOTP"
+        }
+    ]
+}
+```
