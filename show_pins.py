@@ -6,7 +6,12 @@
 from https://github.com/helloworld1/FreeOTPPlus
 """
 
+import sys
+
 import freeotp
 
-filename = 'freeotp-backup.json'
+try:
+    filename = sys.argv[1]
+except IndexError:
+    filename = 'freeotp-backup.json'
 freeotp.doit(filename, verbose=False, display_registration_details=False)
