@@ -74,6 +74,7 @@ Sample schema with notes (i.e. not real).
 
 
   * secret (in base32) "MZXW633PN5XW6===" == 'fooooooo' , See https://github.com/google/google-authenticator/issues/70
+    Also default test sample in gtotp gauth.py
   * secret (in base32) "PSKFB2VHFIEGNI2H"
 
 Also see:
