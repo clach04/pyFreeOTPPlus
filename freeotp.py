@@ -101,7 +101,6 @@ def doit(filename, verbose=True, display_registration_details=True):
         if verbose:
             print(x)
         print('issuer %s%s%s' % (color_green, x['issuerExt'], highlight_text_stop))
-        print('label %s%s%s' % (color_green, x['label'], highlight_text_stop))
         assert x['algo'] == u'SHA1'
         assert x['type'] == 'TOTP'
 
