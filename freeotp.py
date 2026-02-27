@@ -131,7 +131,8 @@ def doit(filename, verbose=True, display_registration_details=True):
             g = gauth.GoogleAuthenticator(bin_secret=bin_secret, num_digits=x['digits'])
             pin = g
         print('Current 2FA/OTP PIN for %s%s%s %s%s%s' % (color_green, x['label'], highlight_text_stop, highlight_text_start, pin, highlight_text_stop))  # TODO this assumes 30 second period window
-        pin_int = int(pin)
+        #import pdb; pdb.set_trace()
+        pin_int = int(str(pin))
         print('                        %s %s%03d-%03d%s' % (' ' * len(x['label']), highlight_text_start, pin_int / 1000, pin_int % 1000, highlight_text_stop))
 
         if display_registration_details:
