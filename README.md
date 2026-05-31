@@ -109,3 +109,14 @@ Also see:
     ]
 }
 ```
+
+# Related
+
+Documentation on file formats used by other tools.
+
+  * https://github.com/andOTP/andOTP/wiki/Backup-format
+  * https://github.com/rich-murphey/freeotp-to-andotp
+  * https://gitlab.com/stavros/freeotp-to-andotp-migrator
+  * https://github.com/andOTP/andOTP/wiki/Migration
+
+
