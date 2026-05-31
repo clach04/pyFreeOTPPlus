@@ -58,6 +58,27 @@ except AttributeError:
 
 is_win = sys.platform.startswith('win')
 
+def load_freeotpplus_json(filename):
+    f = open(filename, 'rb')
+    json_data_str = f.read()
+    f.close()
+    otp = json.loads(json_data_str)
+
+    for x in otp['tokens']:
+        try:
+            signed_int_array = x['secret']  # storage of secret is `signed char`, Python built-in byte array need this to be unsigned
+            unsigned_int_array = [i & 0xff for i in signed_int_array]  # TODO add support for Python pre-generator support
+            bin_secret = bytearray(unsigned_int_array)
+        except KeyError:
+            # standard FreeOTPPlus value missing, now check for (non-standard) extension to format,
+            # check for "secret_base32" instead, this allows for manual updates of json file to be easier/possible
+            try:
+                bin_secret = base64.b32decode(x['secret_base32'])
+            except KeyError:
+                raise ValueError('Missing secret in (json) config, both standard "secret" and extension "secret_base32"')
+        x['bin_secret'] = bin_secret
+    return otp
+
 def doit(filename, verbose=True, display_registration_details=True):
     guess_color_available = (colorama is not None) or (not is_win) or (is_win and ('TERM' in os.environ or 'TERM_PROGRAM' in os.environ))
     if os.environ.get('NO_COLOR'):  # NO_COLOR https://no-color.org/
@@ -83,13 +104,8 @@ def doit(filename, verbose=True, display_registration_details=True):
         highlight_text_start, highlight_text_stop = '', ''
         color_green = ''
 
-
     print(filename)
-    f = open(filename, 'rb')
-    json_data_str = f.read()
-    f.close()
-    otp = json.loads(json_data_str)
-
+    otp = load_freeotpplus_json(filename)
 
     t = time.time()
     result = []
@@ -104,17 +120,7 @@ def doit(filename, verbose=True, display_registration_details=True):
         assert x['algo'] == u'SHA1'
         assert x['type'] == 'TOTP'
 
-        try:
-            signed_int_array = x['secret']  # storage of secret is `signed char`, Python built-in byte array need this to be unsigned
-            unsigned_int_array = [i & 0xff for i in signed_int_array]  # TODO add support for Python pre-generator support
-            bin_secret = bytearray(unsigned_int_array)
-        except KeyError:
-            # standard value missing, now check for (non-standard) extension to format,
-            # check for "secret_base32" instead, this allows for manual updates of json file to be easier/possible
-            try:
-                bin_secret = base64.b32decode(x['secret_base32'])
-            except KeyError:
-                raise ValueError('Missing secret in (json) config, both standard "secret" and extension "secret_base32"')
+        bin_secret = x['bin_secret']
         if verbose:
             print('Binary secret length=%d' % len(bin_secret))
         secret_base32 = b32encode(bin_secret)
