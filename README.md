@@ -1,6 +1,7 @@
 # pyFreeOTPPlus
 
 Python script to dump TOTP RFC 6238 2fa/otp pin from [Android FreeOTPPlus (FreeOTP+)](https://github.com/helloworld1/FreeOTPPlus) export file freeotp-backup.json
+Also includes a tool to export JSON file suitable for use with FreeOTPPlus when the json file isn't strictly FreeOTPPlus compliant (allows import of base64 encoded secrets and missing token order).
 
 Should work with almost any version of Python from 2.6 onwards.
 Only tested with:
@@ -46,7 +47,7 @@ Also dumps a URL for qrcode scanning - NOTE browser history will expose seed - d
 
 ## freeotp-backup.json schema
 
-Sample schema with notes (i.e. not real).
+Sample schema with notes (i.e. not a real FreeOTPPlus JSON file, use safe_export.py to convert).
 
     {
         "tokens": [
