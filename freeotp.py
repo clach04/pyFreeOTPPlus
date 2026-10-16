@@ -48,6 +48,12 @@ except ImportError:
     pyotp = None
 
 
+try:
+    #from puren_tonbo import pt_open as open
+    from puren_tonbo import pt_open
+except ImportError:
+    pt_open = None
+
 
 b32encode = base64.b32encode
 
@@ -59,7 +65,10 @@ except AttributeError:
 is_win = sys.platform.startswith('win')
 
 def load_freeotpplus_json(filename):
-    f = open(filename, 'rb')
+    if pt_open:
+        f = pt_open(filename, 'r')
+    else:
+        f = open(filename, 'rb')
     json_data_str = f.read()
     f.close()
     otp = json.loads(json_data_str)

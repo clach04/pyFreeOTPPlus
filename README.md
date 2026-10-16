@@ -25,6 +25,12 @@ Optionally install QR code generator for console output:
 
 I.e. `pip install pyotp segno`
 
+Optionally install puren_tonbo for reading encrypted and/or compressed files:
+
+    pip install puren_tonbo
+    pip install "puren_tonbo[all]"
+    pip install "puren_tonbo[jenc]"  # etc.
+
 Quick and dirty setup, if skipping above:
 
     curl https://hg.sr.ht/~clach04/gtotp/raw/gauth.py?rev=tip -o gauth.py
@@ -32,6 +38,9 @@ Quick and dirty setup, if skipping above:
 ## Usage
 
     python freeotp.py freeotp-backup.json
+    python freeotp.py freeotp-backup.json.gz  # if puren_tonbo is installed
+    python freeotp.py freeotp-backup.json.jenc  # if puren_tonbo (and dependents) is installed
+    python freeotp.py freeotp-backup.json.age  # if puren_tonbo (and dependents) is installed
 
 Dumps pins for all.
 Also dumps a URL for qrcode scanning - NOTE browser history will expose seed - do not use!
