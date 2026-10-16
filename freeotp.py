@@ -63,12 +63,19 @@ except AttributeError:
     urlencode = urllib.parse.urlencode  # py3
 
 is_win = sys.platform.startswith('win')
+is_py3 = sys.version_info >= (3,)
 
 def load_freeotpplus_json(filename):
-    if pt_open:
-        f = pt_open(filename, 'r')
+    if filename == '-':
+        if is_py3:
+            f = sys.stdin.buffer
+        else:
+            f = sys.stdin
     else:
-        f = open(filename, 'rb')
+        if pt_open:
+            f = pt_open(filename, 'r')
+        else:
+            f = open(filename, 'rb')
     json_data_str = f.read()
     f.close()
     otp = json.loads(json_data_str)
